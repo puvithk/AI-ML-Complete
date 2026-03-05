@@ -209,7 +209,7 @@ class Decoder:
     def forward(self , output_embedings , encoder_output ):
         posistional_embedings  = self.posistional_embedings.apply_sisodial_embedings(output_embedings)
 
-        masked_multi_attention_layer = self.multi_head_attention.forward(posistional_embedings ,posistional_embedings,posistional_embedings)
+        masked_multi_attention_layer = self.masked_multi_attention_layer.forward(posistional_embedings )
 
         add_norm_1 = self.add_and_normalize.forward(posistional_embedings , masked_multi_attention_layer)
 
