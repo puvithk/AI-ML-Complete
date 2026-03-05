@@ -172,10 +172,10 @@ class FeedForwardNetwork:
         self.learing_rate = learning_rate
         self.d_model = d_model
         self.rng = np.random.default_rng(42)
-        self.w2 = self.rng.standard_normal(( n_token, d_model))
-        self.w1 = self.rng.standard_normal(( d_model ,n_token))
+        self.w2 = self.rng.standard_normal(( d_model * 4 , d_model))
+        self.w1 = self.rng.standard_normal(( d_model , d_model * 4))
         self.b2 = np.zeros((d_model, ))
-        self.b1 = np.zeros((n_token, ))
+        self.b1 = np.zeros((d_model*4, ))
     def relu(self , x :np.ndarray) -> np.ndarray:
         x = np.maximum(x , 0)
         return x 
@@ -219,8 +219,8 @@ class Encoder:
 batch_size = 5
 sequence_length = 20
 d_model = 128
-
-vector = np.random.rand(batch_size,  sequence_length, d_model)
+rng = np.random.default_rng(42)
+vector = rng.standard_normal((batch_size,  sequence_length, d_model))
 
 encoder = Encoder(d_model=128, no_head=8, no_token=20)
 print(vector.shape)
