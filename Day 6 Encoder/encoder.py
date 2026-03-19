@@ -134,25 +134,34 @@ class MultiHeadSelfAttentionLayer:
     def softmax(self , x :np.ndarray) -> np.ndarray:
         exp_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
         return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
-    def forward(self , X ):
-        final_output = []
-        for i in range(self.no_head):
-            curr_head = X 
-            q = curr_head @  self.wq[i]   
-            k = curr_head @ self.wk[i]
-            v = curr_head @ self.wv[i]
-        
-            k_t = np.transpose(k , (0 , 2 , 1 ))
-            qk = q @ k_t
-            softmax_output = self.softmax(qk/np.sqrt(self.dh)) 
-            head_output   = softmax_output @ v
-            final_output.append(head_output)
-        concated = np.concatenate(final_output , axis=2)
-        print(concated.shape)
-        print(self.wo.shape)
-        output = concated @ self.wo
-        return output
+    def forward(self, X):
 
+        batch, seq_len, _ = X.shape
+
+        # Compute Q K V for all heads
+        Q = np.einsum("bsd,hdf->bhsf", X, self.wq)
+        K = np.einsum("bsd,hdf->bhsf", X, self.wk)
+        V = np.einsum("bsd,hdf->bhsf", X, self.wv)
+
+     
+
+        # Attention
+        KT = K.transpose(0,1,3,2)
+
+        scores = Q @ KT
+        scores = scores / np.sqrt(self.dh)
+
+        attn = self.softmax(scores)
+
+        head_output = attn @ V
+
+        # combine heads
+        head_output = head_output.transpose(0,2,1,3)
+        concat = head_output.reshape(batch, seq_len, self.no_head*self.dh)
+
+        output = concat @ self.wo
+
+        return output
 class AddAndNormalize:
     def __init__(self, eps=1e-6):
         self.eps = eps
