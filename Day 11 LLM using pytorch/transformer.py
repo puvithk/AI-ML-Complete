@@ -60,6 +60,8 @@ class FeedForwardNetwork(nn.Module):
         self.relu = nn.ReLU()
     def forward(self , x):
         return self.f2(self.relu(self.f1(x)))
+    
+
 class EncoderBlock(nn.Module):
     def __init__(self, d_model , seq_len , num_head):
         super(EncoderBlock , self).__init__()
@@ -75,6 +77,34 @@ class EncoderBlock(nn.Module):
         feed_forward_output = self.feed_forward_network(add_normalize_output)
         add_normalize_output = self.add_and_normalize.forward(add_normalize_output  , feed_forward_output)
         return add_normalize_output
+    
+
+
+class DecoderBlock(nn.Module):
+    def __init__(self, d_model , seq_len , num_head):
+        super(DecoderBlock , self).__init__()
+        self.d_model = d_model
+        self.seq_len = seq_len
+        self.num_head = num_head
+        self.masked_attention_layer = MultiHeadAttentionLayer(d_model , seq_len , num_head)
+        self.add_and_normize_masked = AddAndNormalize()
+        self.multi_attention_layer = MultiHeadAttentionLayer(d_model , seq_len , num_head)
+        self.add_and_normize_attention = AddAndNormalize()
+        self.feed_forward_network =  FeedForwardNetwork(d_model)
+        self.add_and_normize_feed = AddAndNormalize()
+    def forward(self , x , encoder_value , mask ):
+        masked_attention = self.masked_attention_layer(x,x,x , mask=mask)
+        add_and_normize_masked_output = self.add_and_normize_masked.forward( masked_attention , x )
+        multi_attention_layer = self.multi_attention_layer(encoder_value , add_and_normize_masked_output , encoder_value)
+        add_and_normize_output = self.add_and_normize_attention.forward(multi_attention_layer , add_and_normize_masked_output)
+        feed_forward_output = self.feed_forward_network(add_and_normize_output)
+        output = self.add_and_normize_feed.forward(feed_forward_output , add_and_normize_output)
+        return output
+    
+class Transformer(nn.Module):
+    def __init__(self):
+        super(Transformer , self ).__init__()
+
 
 
 batch = 5 
