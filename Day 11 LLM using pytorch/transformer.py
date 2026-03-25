@@ -27,7 +27,7 @@ class MultiHeadAttentionLayer(nn.Module):
     def scalar_dot_product(self , q:torch.Tensor,k:torch.Tensor,v:torch.Tensor  , masked:torch.Tensor =  None):
         attention_score:torch.Tensor = torch.matmul(q , k.transpose(2,3)) / np.sqrt(self.dv)
         if masked is not None:
-            attention_score = attention_score.masked_fill(mask=0 , value=-1e9)
+            attention_score = attention_score.masked_fill(masked==0 , value=-1e9)
         softmax = torch.softmax(attention_score , dim=-1)  
         return torch.matmul(softmax , v)
 
@@ -39,19 +39,16 @@ class MultiHeadAttentionLayer(nn.Module):
      
         return self.wo(self.combine(attention))
         
-class AddAndNormalize():
+class AddAndNormalize(nn.Module):
     def __init__(self, eps=1e-6):
+        super(AddAndNormalize, self).__init__()
         self.eps = eps
-
-    def layer_norm(self, x):
-        mean =torch.mean(x, dim=-1, keepdims=True)
-        var = torch.var(x, dim=-1, keepdims=True)
-        return (x - mean) / torch.sqrt(var + self.eps)
 
     def forward(self, x, sublayer_output):
         added = x + sublayer_output
-        return self.layer_norm(added)
-
+        mean = torch.mean(added, dim=-1, keepdim=True)
+        var = torch.var(added, dim=-1, keepdim=True)
+        return (added - mean) / torch.sqrt(var + self.eps)
 class FeedForwardNetwork(nn.Module):
     def __init__(self, d_model ):
         super(FeedForwardNetwork, self).__init__()
@@ -93,18 +90,54 @@ class DecoderBlock(nn.Module):
         self.feed_forward_network =  FeedForwardNetwork(d_model)
         self.add_and_normize_feed = AddAndNormalize()
     def forward(self , x , encoder_value , mask ):
-        masked_attention = self.masked_attention_layer(x,x,x , mask=mask)
-        add_and_normize_masked_output = self.add_and_normize_masked.forward( masked_attention , x )
-        multi_attention_layer = self.multi_attention_layer(encoder_value , add_and_normize_masked_output , encoder_value)
-        add_and_normize_output = self.add_and_normize_attention.forward(multi_attention_layer , add_and_normize_masked_output)
+        masked_attention = self.masked_attention_layer(x,x,x , masked=mask)
+        add_and_normize_masked_output = self.add_and_normize_masked(x ,masked_attention )
+        multi_attention = self.multi_attention_layer( add_and_normize_masked_output , encoder_value , encoder_value)
+        add_and_normize_output = self.add_and_normize_attention(add_and_normize_masked_output ,multi_attention )
         feed_forward_output = self.feed_forward_network(add_and_normize_output)
-        output = self.add_and_normize_feed.forward(feed_forward_output , add_and_normize_output)
+        output = self.add_and_normize_feed(add_and_normize_output ,feed_forward_output )
         return output
-    
-class Transformer(nn.Module):
-    def __init__(self):
-        super(Transformer , self ).__init__()
 
+class Mask(nn.Module):
+    def __init__(self, seq_len):
+        super(Mask, self).__init__()
+        self.seq_len = seq_len
+
+    def forward(self):
+        mask = torch.tril(torch.ones(self.seq_len, self.seq_len))
+        return mask.unsqueeze(0).unsqueeze(0)  # (1,1,seq,seq)
+
+class Transformer(nn.Module):
+    def __init__(self , d_model , seq_len , num_head  , vocal_size):
+        super(Transformer , self ).__init__()
+        self.d_model = d_model
+        self.seq_len = seq_len
+        self.num_head = num_head
+        self.encoder_layers = nn.ModuleList(
+                [EncoderBlock(d_model, seq_len, num_head) for _ in range(4)]
+            )
+
+        self.decoder_layers = nn.ModuleList(
+            [DecoderBlock(d_model, seq_len, num_head) for _ in range(4)]
+        )
+        self.linear =  nn.Linear(d_model , vocal_size)
+        self.masked = Mask( seq_len)
+    def forward(self, src, tgt):
+        
+
+        mask = self.masked.forward()
+        enc_output = src
+        for layer in self.encoder_layers:
+            enc_output = layer(enc_output)
+
+
+        dec_output = tgt
+        for layer in self.decoder_layers:
+            dec_output = layer(dec_output, enc_output , mask)
+
+        output = self.linear(dec_output)
+
+        return output
 
 
 batch = 5 
@@ -114,7 +147,11 @@ num_head = 8
 
 
 
-X  = torch.rand((batch , seq_len , d_model))
+X = torch.rand((batch, seq_len, d_model))
+Y = torch.rand((batch, seq_len, d_model))
 
+transform = Transformer(d_model, seq_len, num_head, 516)
 
+output = transform(X, Y)
 
+print(output.shape)
