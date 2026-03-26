@@ -1,7 +1,16 @@
 import torch
 from torch import nn
 import numpy as np
+import math
 
+
+def generate_mask(seq_len, device):
+    mask = torch.tril(torch.ones(seq_len, seq_len)).bool()
+    return mask.unsqueeze(0).unsqueeze(0).to(device)
+def create_padding_mask(seq, pad_token=0):
+    mask = (seq != pad_token)   
+    return mask.unsqueeze(1).unsqueeze(2)  
+    # shape → (batch, 1, 1, seq_len)
 class MultiHeadAttentionLayer(nn.Module):
     def __init__(self , d_model , s_len , num_head):
         super(MultiHeadAttentionLayer , self).__init__()
@@ -25,9 +34,9 @@ class MultiHeadAttentionLayer(nn.Module):
     
     
     def scalar_dot_product(self , q:torch.Tensor,k:torch.Tensor,v:torch.Tensor  , masked:torch.Tensor =  None):
-        attention_score:torch.Tensor = torch.matmul(q , k.transpose(2,3)) / np.sqrt(self.dv)
+        attention_score:torch.Tensor = torch.matmul(q , k.transpose(2,3)) / math.sqrt(self.dv)
         if masked is not None:
-            attention_score = attention_score.masked_fill(masked==0 , value=-1e9)
+            attention_score = attention_score.masked_fill(~masked ,  float('-inf'))
         softmax = torch.softmax(attention_score , dim=-1)  
         return torch.matmul(softmax , v)
 
@@ -57,7 +66,31 @@ class FeedForwardNetwork(nn.Module):
         self.relu = nn.ReLU()
     def forward(self , x):
         return self.f2(self.relu(self.f1(x)))
-    
+
+class PositionalEncoding:
+    def __init__(self, d_model, seq_len):
+        position = torch.arange(seq_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+
+        pe = torch.zeros(seq_len, d_model)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        self.encoding = pe.unsqueeze(0)
+
+    def forward(self, x):
+        return x + self.encoding[:, :x.size(1)].to(x.device)
+class EmbeddingsEncoding(nn.Module):
+    def __init__(self  , vocal_size , d_model , seq_size):
+        super(EmbeddingsEncoding , self).__init__()
+        self.vocal_size =  vocal_size
+        self.d_model = d_model
+        self.embeddings =  nn.Embedding(vocal_size , d_model)
+        self.positionEncoding = PositionalEncoding(d_model , seq_size)
+    def forward(self , x ):
+        token = self.embeddings(x) * math.sqrt(self.d_model)
+        return self.positionEncoding.forward(token)
+
 
 class EncoderBlock(nn.Module):
     def __init__(self, d_model , seq_len , num_head):
@@ -68,8 +101,8 @@ class EncoderBlock(nn.Module):
         self.multi_attention_layer = MultiHeadAttentionLayer(d_model , seq_len , num_head)
         self.add_and_normalize = AddAndNormalize()
         self.feed_forward_network = FeedForwardNetwork(d_model )
-    def forward(self, x):
-        attention_output = self.multi_attention_layer(x , x , x)
+    def forward(self, x , mask=None):
+        attention_output = self.multi_attention_layer(x , x , x , masked = mask)
         add_normalize_output = self.add_and_normalize.forward(x ,  attention_output)
         feed_forward_output = self.feed_forward_network(add_normalize_output)
         add_normalize_output = self.add_and_normalize.forward(add_normalize_output  , feed_forward_output)
@@ -104,7 +137,7 @@ class Mask(nn.Module):
         self.seq_len = seq_len
 
     def forward(self):
-        mask = torch.tril(torch.ones(self.seq_len, self.seq_len))
+        mask = torch.tril(torch.ones(self.seq_len, self.seq_len)).bool()
         return mask.unsqueeze(0).unsqueeze(0)  # (1,1,seq,seq)
 
 class Transformer(nn.Module):
@@ -122,36 +155,80 @@ class Transformer(nn.Module):
         )
         self.linear =  nn.Linear(d_model , vocal_size)
         self.masked = Mask( seq_len)
+        self.embedding = EmbeddingsEncoding(vocal_size, d_model, seq_len)
     def forward(self, src, tgt):
-        
+        src_mask = create_padding_mask(src).to(src.device)
+        tgt_padding_mask = create_padding_mask(tgt).to(src.device)
 
-        mask = self.masked.forward()
+        src = self.embedding(src)
+        tgt = self.embedding(tgt)
+
+        tgt_len = tgt.size(1)
+
+        look_ahead_mask = torch.tril(torch.ones(tgt_len, tgt_len)).bool()
+        look_ahead_mask = look_ahead_mask.unsqueeze(0).unsqueeze(0).to(src.device)
+
+        
+        combined_mask = look_ahead_mask & tgt_padding_mask
         enc_output = src
         for layer in self.encoder_layers:
-            enc_output = layer(enc_output)
-
+            enc_output = layer(enc_output , src_mask )
 
         dec_output = tgt
         for layer in self.decoder_layers:
-            dec_output = layer(dec_output, enc_output , mask)
+            dec_output = layer(dec_output, enc_output, combined_mask)
 
-        output = self.linear(dec_output)
-
-        return output
-
-
-batch = 5 
-seq_len = 64
-d_model = 1080
-num_head = 8
+        return self.linear(dec_output)
 
 
 
-X = torch.rand((batch, seq_len, d_model))
-Y = torch.rand((batch, seq_len, d_model))
+# X = torch.randint(0, vocab_size, (batch, seq_len))
 
-transform = Transformer(d_model, seq_len, num_head, 516)
+# embedding_layer = EmbeddingsEncoding(vocab_size, d_model, seq_len)
 
-output = transform(X, Y)
+# embedded_X = embedding_layer(X)
 
-print(output.shape)
+if __name__ == '__main__':
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    batch = 5
+    seq_len = 64
+    vocab_size = 1000
+    d_model = 512
+    num_head = 8
+    model = Transformer(d_model , seq_len , num_head , vocab_size).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    epochs = 10
+
+    for epoch in range(epochs):
+        model.train()
+
+        total_loss = 0
+
+        for batch_idx in range(100): 
+
+           
+            src = torch.randint(0, vocab_size, (batch, seq_len)).to(device)
+            tgt = torch.randint(0, vocab_size, (batch, seq_len)).to(device)
+
+            tgt_input  = tgt[:, :-1]
+            tgt_output = tgt[:, 1:]
+
+           
+            output = model(src, tgt_input)
+            
+
+            
+            output = output.contiguous().view(-1, vocab_size)
+            tgt_output = tgt_output.reshape(-1)
+
+            loss = criterion(output, tgt_output)
+
+           
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")  
