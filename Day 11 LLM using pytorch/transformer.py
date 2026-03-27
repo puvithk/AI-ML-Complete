@@ -182,11 +182,6 @@ class Transformer(nn.Module):
 
 
 
-# X = torch.randint(0, vocab_size, (batch, seq_len))
-
-# embedding_layer = EmbeddingsEncoding(vocab_size, d_model, seq_len)
-
-# embedded_X = embedding_layer(X)
 
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -197,7 +192,7 @@ if __name__ == '__main__':
     num_head = 8
     model = Transformer(d_model , seq_len , num_head , vocab_size).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5)
     epochs = 10
 
     for epoch in range(epochs):
