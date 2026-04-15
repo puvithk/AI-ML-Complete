@@ -84,7 +84,8 @@ asyncio.run(main())
 
 index = VectorStoreIndex.from_vector_store(
     vector_store=vector_store,
-    embed_model=embeding_model
+    embed_model=embeding_model 
+
 )
 
 # Query engine
