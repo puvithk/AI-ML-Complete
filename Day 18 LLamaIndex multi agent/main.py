@@ -15,9 +15,7 @@ from llama_index.core.tools import QueryEngineTool
 import chromadb
 import os
 import asyncio
-from dotenv import load_dotenv
 
-load_dotenv()
 
 
 def build_index():
@@ -68,10 +66,10 @@ def build_index():
     collection_found = False 
     # Chroma DB setup
     chroma = chromadb.PersistentClient(path='./personal_db')
-    if(chroma.get_collection('puvith')):
+    try:
         chroma_collection = chroma.get_collection('puvith')
         collection_found = True
-    else :
+    except:
         chroma_collection = chroma.get_or_create_collection('puvith')
         collection_found = False
 

@@ -1,25 +1,16 @@
-from llama_index.llms.google_genai import GoogleGenAI
-from llama_index.core.agent.workflow  import  AgentWorkflow 
-from llama_index.core.workflow import Context
-import dotenv
-dotenv.load_dotenv()
-from llama_index.core.tools import FunctionTool
-
+from llama_index.core.agent.workflow import AgentWorkflow , ReActAgent 
+from llama_index.core.tools import FunctionTool , QueryEngineTool
 from llama_index.core import Document, VectorStoreIndex, Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.google_genai import GoogleGenAI
-from llama_index.core.tools import QueryEngineTool
 import chromadb
-import os
+import os 
 import asyncio
 from dotenv import load_dotenv
-
 load_dotenv()
-
-
 def build_index():
     project_ideas  = [
     {
@@ -68,10 +59,10 @@ def build_index():
     collection_found = False 
     # Chroma DB setup
     chroma = chromadb.PersistentClient(path='./personal_db')
-    if(chroma.get_collection('puvith')):
+    try:
         chroma_collection = chroma.get_collection('puvith')
         collection_found = True
-    else :
+    except:
         chroma_collection = chroma.get_or_create_collection('puvith')
         collection_found = False
 
@@ -121,44 +112,51 @@ def build_index():
     return index
 
 
-def get_weather(location: str) -> str:
-    """Useful for getting the weather for a given location."""
-    print(f"Getting weather for {location}")
-    return f"The weather in {location} is sunny"
+def multipication(a:int , b:int)-> int :
+    "Used to multiple two numbers"
+    print(f"Multipying {a } * {b}")
+    return a*b
 
-
-tool = FunctionTool.from_defaults(
-    get_weather , 
-    name='get_weather',
-    description="Useful for getting the weather for a given location."
+multi_tool = FunctionTool.from_defaults(
+    multipication,
+    name="multipication_tool" ,
+    description="USed to multiply 2 numbers"
 )
-
 llm = GoogleGenAI(
     model="gemini-3-flash-preview"
 )
-
-
 index = build_index()
-queryEngine = index.as_query_engine(llm=llm)
-queryTool = QueryEngineTool.from_defaults(queryEngine , name="presonal_project" , description="My peronsal project which i have done in my life time ")
-agent = AgentWorkflow.from_tools_or_functions(
-[tool , queryTool],
-    llm=llm)
+query_engine = index.as_query_engine(llm=llm)
+
+query_tool = QueryEngineTool.from_defaults(
+    query_engine=query_engine 
+    , name="presonal_project" , description="My peronsal project which i have done in my life time "
+)
 
 
-ctx = Context(agent)
-context = dict
+calci_agent = ReActAgent(
+    name='calculator_agent',
+    description="Multipies 2 number ",
+    tools=[multi_tool] ,
+    llm=llm
+)
+
+info_agent  = ReActAgent(
+    name="Personal_info",
+    description="Get personal Info based on the query",
+    tools = [query_tool] ,
+     llm=llm
+)
+
+master_agent = AgentWorkflow(
+    agents=[calci_agent , info_agent] , 
+    root_agent='calculator_agent'
+)
+
 async def main():
-    global context
-    # response = await agent.run("My name is Puvith" , ctx = ctx)
-
-    # print(response)
-    # response = await agent.run("Whats my name" , ctx=ctx)
-    # print(response)
-
-    response = await agent.run("What are my presonal project which is related to web devoploment ?")
+    response = await master_agent.run("What is 8  multipled by 2")
     print(response)
- 
-
-import asyncio
-asyncio.run(main())
+    response = await master_agent.run("What is the ai porojects avalible ")
+    print(response)
+if __name__ =='__main__':
+    asyncio.run(main())
