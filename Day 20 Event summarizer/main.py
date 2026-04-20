@@ -62,17 +62,13 @@ async def main():
             2. Search my Google Calendar for important non-meeting events from today until {end_of_month_str}. 
             Specifically look for: Deadlines, Exams, Submissions, and Milestones.
 
-            ### STEP 2: EMAIL PREPARATION
-            Once (and only after) you have gathered all the data:
-            1. Format the findings into a clean, professional HTML table. 
-            2. Use inline CSS for styling (e.g., professional blues/greys, clear borders).
-            3. If no events are found for a category, state "No events scheduled."
+   
 
-            ### STEP 3: DELIVERY
+            ### STEP 2: DELIVERY
             Send an email with the following details:
             - TO: puvithkumar05@gmail.com
             - SUBJECT: TODAY'S EVENTS AND IMPORTANT DATES ({today_str})
-            - BODY: The generated HTML summary.
+            - BODY: The generated summary.
 
             Final confirmation: Confirm to me once the email has been successfully sent.
             """
