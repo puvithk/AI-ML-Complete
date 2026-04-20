@@ -1,0 +1,4 @@
+.env
+/personal_db
+oauth.json
+token.json
