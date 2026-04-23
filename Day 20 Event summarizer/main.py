@@ -7,6 +7,7 @@ import llama_index.core
 import smtplib
 from email.mime.text import MIMEText
 from llama_index.llms.openai import OpenAI
+from llama_index.llms.ollama import Ollama
 llama_index.core.set_global_handler("simple")
 from datetime import datetime
 import calendar
@@ -22,8 +23,10 @@ google_tool = GoogleCalendarToolSpec(credentials_path='oauth.json' ,
 
 #Gemini LLM 
 llm = GoogleGenAI(
-        model='gemini-2.5-flash'
-)# llm = Anthropic(
+        model='gemini-3-flash-preview'
+)
+
+# llm = Anthropic(
 #     model='claude-haiku-4-5-20251001',
 #     api_key=os.environ.get("ANTHROPIC_API")
 # )
