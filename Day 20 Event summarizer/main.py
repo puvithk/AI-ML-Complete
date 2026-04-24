@@ -118,8 +118,7 @@ async def main():
             to get real data before moving to the GmailAgent.
             ### STEP 1: DATA COLLECTION
             1. Search my Google Calendar for all meetings and events scheduled for today ({today_str}).
-            2. Search my Google Calendar for important non-meeting events from today until {end_of_month_str} (Deadlines, Exams, Submissions, and Milestones).
-
+            2. Search my Google Calendar for important non-meeting events from today until {end_of_month_str} IMPORTANT ONLY - (Deadlines, Exams, Submissions, and Milestones).
             ### STEP 2: EMAIL PREPARATION
             Use the following HTML template for the email body. Replace the placeholders with the data you retrieved:
 
