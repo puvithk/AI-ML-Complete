@@ -84,8 +84,7 @@ builder.add_edge("tools_calling_llm" , END)
 # %%
 agent = builder.compile()
 
-# %%
-agent
+
 
 # %%
 display(Image(agent.get_graph().draw_mermaid_png()))
