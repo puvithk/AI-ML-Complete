@@ -13,7 +13,7 @@ class State(TypedDict):
 
     sub_questions: Annotated[list[str],Field(description="A list of research questions derived from the user's query to guide the research process.")]
 
-    plan: Annotated[list,Field(description="The research plan containing objectives, priorities, and tasks to be completed.")]
+    plan: Annotated[list[dict],Field(description="The research plan containing objectives, priorities, and tasks to be completed.")]
 
     research_results: Annotated[list,Field(description="Raw information, findings, and data collected from various research sources.")]
 
