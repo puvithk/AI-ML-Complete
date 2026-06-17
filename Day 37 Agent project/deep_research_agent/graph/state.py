@@ -15,7 +15,7 @@ class State(TypedDict):
 
     plan: Annotated[list[dict],Field(description="The research plan containing objectives, priorities, and tasks to be completed.")]
 
-    research_results: Annotated[list,Field(description="Raw information, findings, and data collected from various research sources.")]
+    research_results: Annotated[list[dict],Field(description="Raw information, findings, and data collected from various research sources.")]
 
     evidence: Annotated[list,Field(description="Validated and organized evidence extracted from research results for report generation.")]
 
