@@ -17,7 +17,7 @@ class State(TypedDict):
 
     research_results: Annotated[list[dict],Field(description="Raw information, findings, and data collected from various research sources.")]
 
-    evidence: Annotated[list,Field(description="Validated and organized evidence extracted from research results for report generation.")]
+    evidence: Annotated[list[dict],Field(description="Validated and organized evidence extracted from research results for report generation.")]
 
     need_more_research: Annotated[bool,Field(description="Indicates whether additional research is required based on the critic's evaluation.") ]
 
