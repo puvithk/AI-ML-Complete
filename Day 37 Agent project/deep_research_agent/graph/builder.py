@@ -8,6 +8,10 @@ from agent.draft_report import draft_report
 from agent.critic  import critic
 
 from nodes.router import should_continue_research
+
+from langgraph.checkpoint.memory import MemorySaver
+
+memory = MemorySaver()
 builder = StateGraph(State)
 
 builder.add_node("question_decomposer" , question_decomposer)
@@ -29,4 +33,4 @@ builder.add_conditional_edges(
         "research_agent": "research_agent",  
         "__end__": END
     })
-agent = builder.compile()
+agent = builder.compile(checkpointer=memory)
