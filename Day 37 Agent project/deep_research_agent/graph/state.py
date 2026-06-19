@@ -21,6 +21,6 @@ class State(TypedDict):
 
     need_more_research: Annotated[bool,Field(description="Indicates whether additional research is required based on the critic's evaluation.") ]
 
-    iteration: Annotated[int,Field(  description="Tracks the number of research-review cycles completed.")]
+    iteration: Annotated[int,Field( 0, description="Tracks the number of research-review cycles completed.")]
 
     current_confidence : Annotated[float , Field(description="Confidance score of the current Draft report")]

@@ -47,7 +47,7 @@ def critic(state: State)-> State:
 
     return {
             "need_more_research": response.need_more_research,
-    "critic_feedback": response.feedback
+    "critic_feedback": response.feedback,
     }
 
 
