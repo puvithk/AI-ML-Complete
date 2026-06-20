@@ -1,0 +1,12 @@
+.env
+
+/.langgraph_api
+
+/__pycache__
+
+langgraph.json
+
+chatbot.db
+
+chatbot.db-shm
+chatbot.db-wal
