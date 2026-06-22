@@ -53,6 +53,5 @@ flowchart TD
     Give Invest / Pass / Pivot verdict"]
 
     SYN --> OUT1["VC Memo PDF"]
-    SYN --> OUT2["Landing Page HTML"]
     SYN --> OUT3["Score Dashboard"]
 ```
