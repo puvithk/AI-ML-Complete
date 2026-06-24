@@ -7,9 +7,8 @@ from .state import MainState
 
 
 # Build a basic agent 
-
 # Add the state 
-
+builder = StateGraph(MainState)
 # Create node of each agent or operations 
     # Question summarizer and decompose 
     # Users approver 
