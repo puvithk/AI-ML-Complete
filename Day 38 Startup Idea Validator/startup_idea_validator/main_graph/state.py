@@ -1,6 +1,6 @@
 #Defining the main state in the graph 
 from typing  import TypedDict , Annotated
-from pydantic import Field
+from pydantic import Field , BaseModel
 class MainState(TypedDict):
     #Plain user input 
 
@@ -10,13 +10,18 @@ class MainState(TypedDict):
 
     pitch_summary : Annotated[str , Field(description="Detailed explanation of the pitch or the idea which the research should be carried out")]
 
-
+    pitch_summary_feedback : Annotated[str , Field(description="The feedback given  by the user for he current summary ")]
     # Approved buy the user 
 
 
-    user_approved : Annotated[bool , Field(description="Weather the final summary if approved by the user or not")]
+    user_approved_summary : Annotated[bool , Field(description="Weather the final pitch summary is approved by the user or not")]
 
 
     # Other agents output 
 
     
+class PitchSummary(BaseModel):
+
+    pitch_summary : str = Field(description="Pitch summary in depth info about the current idea")
+
+
