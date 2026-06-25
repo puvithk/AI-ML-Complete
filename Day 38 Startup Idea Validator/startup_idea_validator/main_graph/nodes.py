@@ -1,6 +1,10 @@
 # Creating various nodes for the graph
+from typing import Literal
 from utils.llm import llm
 from .state import MainState , PitchSummary
+from langgraph.types import interrupt
+
+
 def pitch_summarizer(state : MainState)-> MainState:
     previous_summary = state.get("pitch_summary", "")
     previous_feedback = state.get("pitch_summary_feedback", "")
@@ -33,4 +37,14 @@ def pitch_summarizer(state : MainState)-> MainState:
         'pitch_summary' : response.model_dump()['pitch_summary']
     }
 
+def human_approval(state):
+    #This node is used to inpterupt the agent 
+    if state.get("user_approved_summary") is not None:
+        return {}
+    interrupt("User input needed ")
+    return {}
 
+
+def check_user_approval(state : MainState) -> Literal['END' , 'pitch_summarizer']:
+    if state['user_approved_summary']:return 'END'
+    else: return 'pitch_summarizer'

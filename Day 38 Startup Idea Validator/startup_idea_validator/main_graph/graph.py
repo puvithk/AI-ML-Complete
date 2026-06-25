@@ -4,9 +4,8 @@
 
 from langgraph.graph import StateGraph , START , END 
 from .state import MainState
-
-from .nodes import pitch_summarizer
-
+from langgraph.checkpoint.memory import InMemorySaver
+from .nodes import pitch_summarizer , check_user_approval , human_approval
 
 # Build a basic agent 
 # Add the state 
@@ -16,7 +15,7 @@ builder = StateGraph(MainState)
 
 builder.add_node('pitch_summarizer' , pitch_summarizer)
     # Users approver 
-
+builder.add_node('human_approval' , human_approval )
     # Compitator agent 
 
     # Market agent 
@@ -28,9 +27,18 @@ builder.add_node('pitch_summarizer' , pitch_summarizer)
 
 # Create egde and conditioanl edge 
 builder.add_edge(START , 'pitch_summarizer')
-builder.add_edge('pitch_summarizer' , END)
-# Complile the build and add memory 
+builder.add_edge('pitch_summarizer' , 'human_approval')
+builder.add_conditional_edges('human_approval' , 
+                                check_user_approval,
+                            {
+                                'END' : END ,
+                                'pitch_summarizer' : 'pitch_summarizer'
+                            }
+                                                        )
 
-agent = builder.compile()
+
+# Complile the build and add memory 
+memory = InMemorySaver()
+agent = builder.compile( checkpointer=memory)
 
 
