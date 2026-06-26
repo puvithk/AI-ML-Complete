@@ -8,8 +8,7 @@ flowchart TD
     C --> D[Research Agent]
 
     D --> T1[Web Search Tool]
-    D --> T2[RAG Tool]
-    D --> T3[PDF Tool]
+
 
     T1 --> E[Evidence Collector]
     T2 --> E

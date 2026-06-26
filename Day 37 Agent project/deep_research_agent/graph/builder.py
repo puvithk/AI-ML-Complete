@@ -6,14 +6,11 @@ from agent.research_agent import research_agent
 from agent.evidence_collector import evidence_collector
 from agent.draft_report import draft_report
 from agent.critic  import critic
-
 from nodes.router import should_continue_research
-
 from langgraph.checkpoint.memory import MemorySaver
 
 memory = MemorySaver()
 builder = StateGraph(State)
-
 builder.add_node("question_decomposer" , question_decomposer)
 builder.add_node("planner" , research_planner)
 builder.add_node("research_agent", research_agent)
