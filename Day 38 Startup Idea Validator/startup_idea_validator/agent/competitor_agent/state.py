@@ -25,7 +25,7 @@ class CompetitorState(TypedDict):
     decision: Literal["web_scraper", "web_search", "draft_report"] = Field(description="Field which decides which function or tool should run")
 
 
-
+    raw_data: Annotated[list[dict], operator.add]
 
 
 
@@ -38,3 +38,12 @@ class CompetitorDecision(BaseModel):
 class QuestionDecomposed(BaseModel):
     # Question for the web search
     questions : list[str] =  Field(description="All the questions based on the user request")
+
+
+
+class WebSearchResultState(TypedDict):
+
+
+    question : str
+
+    raw_data : Annotated[list[str] , operator.add]
