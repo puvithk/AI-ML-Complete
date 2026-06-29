@@ -2,7 +2,7 @@ from typing import TypedDict , Annotated , Literal
 from pydantic import Field  , BaseModel
 
 
-
+import operator
 class CompetitorState(TypedDict):
     #The idea query 
     pitch_query :Annotated[str , Field(description="User givedn pitch query")]
@@ -10,7 +10,7 @@ class CompetitorState(TypedDict):
     pitch_summary : Annotated[str , Field(description="The summary of the full pitch query")]
     #Question which should be asked 
 
-    questions : Annotated[list[str] , Field(description="Question which should be addressed")]
+    questions : Annotated[list[str] ,operator.add, Field(description="Question which should be addressed")]
 
     # Detailed evidance 
     evidance :Annotated[list[dict] , Field(description="Evidance given by the agent for carring out task")]
@@ -33,3 +33,8 @@ class CompetitorDecision(BaseModel):
     decision: Literal["web_scraper", "web_search", "draft_report"] = Field(description="Field which decides which function or tool should run")
 
     decision_feedback : str = Field(description="What should be done based on the current desision")
+
+
+class QuestionDecomposed(BaseModel):
+    # Question for the web search
+    questions : list[str] =  Field(description="All the questions based on the user request")

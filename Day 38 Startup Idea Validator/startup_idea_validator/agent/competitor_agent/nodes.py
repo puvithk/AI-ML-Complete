@@ -1,7 +1,7 @@
-from .state import CompetitorState , CompetitorDecision
+from .state import CompetitorState , CompetitorDecision , QuestionDecomposed
 from typing import Literal
 from utils.llm import llm
-from .prompt import compitator_decision_engine
+from .prompt import compitator_decision_engine , question_decomposer_engine
 def competitor_decision_engine(state : CompetitorState) -> CompetitorState :
     # BAsed on the prevoius data and info source we need to update the state 
     llm_structure = llm.with_structured_output(CompetitorDecision)
@@ -15,5 +15,22 @@ def competitor_decision_engine(state : CompetitorState) -> CompetitorState :
     state['decision_feedback'] = data['decision_feedback']
     state['decision'] = data['decision']
     return state
+
+def question_decompose(state : CompetitorState):
+    #Take the pitch summary and the feedback by the user to provide the alll    the question which should be searched  
+    # Create a llm with structure 
+
+    llm_structure = llm.with_structured_output(QuestionDecomposed)
+
+    # Create a prompt 
+
+    prompt = question_decomposer_engine.format(pitch_summary=state['pitch_summary'] , decision_feedback  = state['decision_feedback'])
+
+
+    response = llm_structure.invoke(prompt)
+
+    return {
+        "questions" : response.model_dump()['questions']
+    }
 
 
