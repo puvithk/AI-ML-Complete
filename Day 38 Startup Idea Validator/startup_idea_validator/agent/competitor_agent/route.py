@@ -1,5 +1,5 @@
 from typing import Literal
-from .state import CompetitorState , WebSearchResultState
+from .state import CompetitorState 
 from langgraph.types import Send
 
 def competitor_router(state: CompetitorState,) -> Literal["web_scraper", "web_search", "draft_report"]:

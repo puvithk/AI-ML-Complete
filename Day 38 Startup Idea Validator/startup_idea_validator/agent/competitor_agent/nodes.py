@@ -1,10 +1,10 @@
-from .state import CompetitorState , CompetitorDecision , QuestionDecomposed , WebSearchResultState
+from .state import CompetitorState , CompetitorDecision , QuestionDecomposed 
 from typing import Literal
-from langgraph.types import Send
-from utils.llm import llm
-from tools.web_tools import web_search_tool
 
-from .prompt import compitator_decision_engine , question_decomposer_engine
+from utils.llm import llm
+
+
+from .prompt import compitator_decision_engine , question_decomposer_engine  
 def competitor_decision_engine(state : CompetitorState) -> CompetitorState :
     # BAsed on the prevoius data and info source we need to update the state 
     llm_structure = llm.with_structured_output(CompetitorDecision)
@@ -36,18 +36,9 @@ def question_decompose(state : CompetitorState):
         "questions" : response.model_dump()['questions']
     }
 
+def merger(state : CompetitorState):
 
-def web_search_node(state : WebSearchResultState):
-    
-    response  = web_search_tool.invoke({
-        'query' : state['question']
-        })
-
-    return {
-        'raw_data' : response
-    }
-    
-
-    
+    print("All data is mergered : ")
+    return state
 
 

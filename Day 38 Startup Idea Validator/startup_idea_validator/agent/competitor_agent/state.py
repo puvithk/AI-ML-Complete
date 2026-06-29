@@ -5,24 +5,24 @@ from pydantic import Field  , BaseModel
 import operator
 class CompetitorState(TypedDict):
     #The idea query 
-    pitch_query :Annotated[str , Field(description="User givedn pitch query")]
+    pitch_query :str 
     # Picth summary #Given by the previous agent 
-    pitch_summary : Annotated[str , Field(description="The summary of the full pitch query")]
+    pitch_summary : str 
     #Question which should be asked 
 
-    questions : Annotated[list[str] ,operator.add, Field(description="Question which should be addressed")]
+    questions : Annotated[list[str] ,operator.add]
 
     # Detailed evidance 
-    evidance :Annotated[list[dict] , Field(description="Evidance given by the agent for carring out task")]
+    evidance :Annotated[list[dict]  ,operator.add]
     #Source of the summary and evidance 
-    sources :Annotated[list[dict] , Field(description="Source collected by various resourses")]
+    sources :Annotated[list[dict] ,operator.add ]
 
     #Detailed summary of the research
 
-    report :Annotated[str , Field(description="Final Summary report of the current agent")] 
+    report :str 
 
-    decision_feedback : str = Field(description="What should be done based on the current desision")
-    decision: Literal["web_scraper", "web_search", "draft_report"] = Field(description="Field which decides which function or tool should run")
+    decision_feedback : str 
+    decision: Literal["web_scraper", "web_search", "draft_report"] 
 
 
     raw_data: Annotated[list[dict], operator.add]
@@ -40,10 +40,3 @@ class QuestionDecomposed(BaseModel):
     questions : list[str] =  Field(description="All the questions based on the user request")
 
 
-
-class WebSearchResultState(TypedDict):
-
-
-    question : str
-
-    raw_data : Annotated[list[str] , operator.add]
