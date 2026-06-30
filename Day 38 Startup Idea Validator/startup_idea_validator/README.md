@@ -2,10 +2,7 @@
 flowchart TD
     USER([User pitch input]) --> ORCH
 
-    ORCH["LangGraph Orchestrator
-    Parse and embed the idea
-    Decompose into sub-tasks
-    Spawn parallel agents"]
+    ORCH["LangGraph Orchestrator"]
 
     ORCH --> CA
     ORCH --> MA
@@ -34,7 +31,7 @@ flowchart TD
       TA2 --> TA3[Detect rising or declining interest]
       TA3 --> TA4[Flag timing risk or opportunity]
     end
-
+    
     CA4 --> AGG
     MA4 --> AGG
     CUA4 --> AGG

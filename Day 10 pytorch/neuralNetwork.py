@@ -19,7 +19,6 @@ def first_attempt():
     loss = nn.MSELoss()
 
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
     X = torch.randn(batch_size, n_in)
     y = torch.randn(batch_size, n_out)
     for i in range(epoch):
