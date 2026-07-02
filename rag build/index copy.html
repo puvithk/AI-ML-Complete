@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Section-Parallel RAG Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#030811;
+    --navy-2:#0a1220;
+    --panel:#0d1626;
+    --border:#1c2940;
+    --steel:#83c1e9;
+    --steel-dim:#4f7ea3;
+    --text:#e7eef7;
+    --text-dim:#8ea3bd;
+    --good:#6fd6a0;
+    --warn:#e9b15c;
+    --low:#7a8aa3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    background:radial-gradient(1200px 600px at 10% -10%, #0d1a30 0%, var(--navy) 55%);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+  }
+  h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif;}
+  header{
+    padding:28px 32px 18px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  header .brand{font-size:20px; font-weight:700; color:var(--text); letter-spacing:.2px;}
+  header .brand span{color:var(--steel);}
+  header .tag{color:var(--text-dim); font-size:13px; margin-top:2px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:24px 32px 60px;}
+  .grid{display:grid; grid-template-columns:340px 1fr; gap:22px;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--navy-2));
+    border:1px solid var(--border); border-radius:14px; padding:18px;
+  }
+  .panel h2{font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--steel); margin:0 0 14px;}
+  .dropzone{
+    border:1.5px dashed var(--border); border-radius:10px; padding:22px 14px;
+    text-align:center; cursor:pointer; transition:.15s; color:var(--text-dim); font-size:13.5px;
+  }
+  .dropzone:hover, .dropzone.drag{border-color:var(--steel); color:var(--text); background:#0d1c30;}
+  input[type=file]{display:none;}
+  input[type=text], input[type=password]{
+    width:100%; background:#0a1424; border:1px solid var(--border); color:var(--text);
+    padding:10px 12px; border-radius:8px; font-size:13.5px; font-family:inherit;
+  }
+  input[type=text]:focus, input[type=password]:focus{outline:1px solid var(--steel); border-color:var(--steel);}
+  label.field{display:block; font-size:12px; color:var(--text-dim); margin:14px 0 6px;}
+  button{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px;
+    background:var(--steel); color:var(--navy); border:none; border-radius:8px;
+    padding:10px 16px; cursor:pointer; transition:.15s;
+  }
+  button:hover{background:#a3d4f2;}
+  button:disabled{background:#294357; color:#7691a8; cursor:not-allowed;}
+  button.ghost{background:transparent; border:1px solid var(--steel-dim); color:var(--steel);}
+  .status{font-size:12.5px; color:var(--text-dim); margin-top:10px; min-height:16px;}
+  .status.err{color:#f18a8a;}
+  .status.ok{color:var(--good);}
+  .sec-item{
+    border:1px solid var(--border); border-radius:9px; padding:9px 10px; margin-bottom:8px;
+    font-size:12.5px; background:#0a1424;
+  }
+  .sec-item .row{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .sec-item .title{font-weight:600; color:var(--text);}
+  .bar{height:4px; border-radius:3px; background:#1c2940; margin-top:6px; overflow:hidden;}
+  .bar > i{display:block; height:100%; background:var(--steel);}
+  .pill{font-size:10.5px; padding:2px 7px; border-radius:99px; border:1px solid var(--border); color:var(--text-dim); white-space:nowrap;}
+  .pill.high{color:var(--good); border-color:#265c46;}
+  .pill.low{color:var(--low); border-color:#33415a;}
+  textarea, .qbar{width:100%;}
+  .qbar{display:flex; gap:10px; margin-bottom:18px;}
+  .qbar input{flex:1;}
+  .answer-box{
+    border:1px solid var(--border); border-radius:12px; padding:18px 20px; background:#0a1424;
+    font-size:14.5px; line-height:1.6; white-space:pre-wrap;
+  }
+  .meta-row{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 20px;}
+  .badge{font-size:11.5px; color:var(--text-dim); border:1px solid var(--border); border-radius:99px; padding:4px 10px;}
+  .badge b{color:var(--steel); font-weight:600;}
+  .section-results{display:grid; gap:12px;}
+  .result-card{border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:#0a1424; opacity:0; transform:translateY(6px); animation:in .35s forwards;}
+  @keyframes in{to{opacity:1; transform:none;}}
+  .result-card .head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px;}
+  .result-card .head .title{font-weight:600; font-size:13.5px; color:var(--text);}
+  .result-card .score{font-size:11px; color:var(--steel);}
+  .chunk{font-size:12.5px; color:var(--text-dim); border-left:2px solid var(--steel-dim); padding-left:10px; margin-top:6px;}
+  .result-card.filtered{opacity:.55;}
+  .result-card.filtered .chunk{border-left-color:#3a3a44;}
+  .gate{font-size:10.5px; padding:2px 8px; border-radius:99px; font-weight:600; letter-spacing:.02em;}
+  .gate.pass{background:#123825; color:var(--good); border:1px solid #265c46;}
+  .gate.fail{background:#2a1a1a; color:#e88; border:1px solid #4a2a2a;}
+  .reasoning{font-size:11.5px; color:var(--text-dim); margin-top:8px; font-style:italic; border-top:1px dashed var(--border); padding-top:8px;}
+  .empty{color:var(--text-dim); font-size:13px; text-align:center; padding:30px 0;}
+  .loading-dot{display:inline-block; width:6px; height:6px; background:var(--steel); border-radius:50%; margin-right:6px; animation:pulse 1s infinite ease-in-out;}
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+  .footer-note{font-size:11.5px; color:var(--text-dim); margin-top:26px; text-align:center;}
+  code{background:#0a1424; padding:1px 6px; border-radius:5px; color:var(--steel); font-size:11.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">Section<span>Parallel</span> RAG</div>
+    <div class="tag">Priority-weighted, section-isolated retrieval over large PDFs</div>
+  </div>
+  <div class="meta-row" id="serverStatus">
+    <span class="badge">backend: <b id="backendUrlLabel">localhost:8000</b></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT: upload + config + sections -->
+    <div>
+      <div class="panel" style="margin-bottom:18px;">
+        <h2>1. Document</h2>
+        <div class="dropzone" id="dropzone">
+          📄 Drop a PDF here or click to browse<br><span style="font-size:11px;">large files OK — section-chunked automatically</span>
+        </div>
+        <input type="file" id="fileInput" accept="application/pdf" />
+        <label class="field">Backend URL</label>
+        <input type="text" id="backendUrl" value="http://localhost:8000" />
+        <label class="field">Gemini API key <span style="opacity:.6;">(optional — enables LLM relevance reasoning + synthesized answers)</span></label>
+        <input type="password" id="apiKey" placeholder="AIza..." />
+        <div class="status" id="uploadStatus"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Detected Sections</h2>
+        <div id="sectionsList"><div class="empty">Upload a PDF to see its sections & priorities</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: query + results -->
+    <div>
+      <div class="panel" style="margin-bottom:18px;">
+        <h2>2. Ask a question</h2>
+        <div class="qbar">
+          <input type="text" id="queryInput" placeholder="e.g. What did accuracy improve to?" disabled />
+          <button id="askBtn" disabled>Ask</button>
+        </div>
+        <div class="meta-row" id="timingRow"></div>
+        <div class="answer-box" id="answerBox">Upload a PDF, then ask a question. Each section is searched in parallel, then Gemini reasons about whether that section's matches are actually relevant — only sections that pass this gate are used for the final answer.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Per-Section Results <span style="color:var(--text-dim); font-weight:400; text-transform:none; font-size:12px;">(ran concurrently)</span></h2>
+        <div class="section-results" id="sectionResults"><div class="empty">No query yet</div></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer-note">Retrieval + Gemini relevance grading run per-section in parallel via a LangGraph fan-out; only sections Gemini judges relevant reach the final answer.</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let docId = null;
+
+function backendUrl(){ return $('backendUrl').value.replace(/\/$/, ''); }
+
+// ---------- Upload ----------
+const dropzone = $('dropzone'), fileInput = $('fileInput');
+dropzone.addEventListener('click', () => fileInput.click());
+['dragover','dragleave','drop'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{
+    e.preventDefault();
+    dropzone.classList.toggle('drag', evt==='dragover');
+  });
+});
+dropzone.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) handleUpload(f);
+});
+fileInput.addEventListener('change', e=>{
+  if(e.target.files[0]) handleUpload(e.target.files[0]);
+});
+
+async function handleUpload(file){
+  if(!file.name.toLowerCase().endsWith('.pdf')){
+    setStatus('uploadStatus', 'Please select a PDF file.', 'err'); return;
+  }
+  setStatus('uploadStatus', `Processing "${file.name}" — detecting sections…`, '');
+  $('askBtn').disabled = true; $('queryInput').disabled = true;
+
+  const form = new FormData();
+  form.append('file', file);
+  try{
+    const res = await fetch(`${backendUrl()}/upload`, { method:'POST', body: form });
+    if(!res.ok){ const err = await res.json().catch(()=>({detail:res.statusText})); throw new Error(err.detail || res.statusText); }
+    const data = await res.json();
+    docId = data.doc_id;
+    setStatus('uploadStatus', `✓ ${data.num_sections} sections, ${data.num_chunks} chunks in ${data.processing_ms}ms`, 'ok');
+    renderSections(data.sections);
+    $('askBtn').disabled = false; $('queryInput').disabled = false;
+  }catch(e){
+    setStatus('uploadStatus', `Error: ${e.message} (is the backend running at ${backendUrl()}?)`, 'err');
+  }
+}
+
+function setStatus(id, text, cls){
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'status' + (cls ? ' '+cls : '');
+}
+
+function priorityPill(p){
+  if(p >= 0.75) return `<span class="pill high">high priority</span>`;
+  if(p <= 0.35) return `<span class="pill low">low priority</span>`;
+  return `<span class="pill">normal</span>`;
+}
+
+function renderSections(sections){
+  const list = $('sectionsList');
+  if(!sections.length){ list.innerHTML = '<div class="empty">No sections found</div>'; return; }
+  list.innerHTML = sections.map(s => `
+    <div class="sec-item">
+      <div class="row">
+        <span class="title">${escapeHtml(s.title)}</span>
+        ${priorityPill(s.priority)}
+      </div>
+      <div style="color:var(--text-dim); margin-top:4px;">${s.num_chunks} chunk${s.num_chunks===1?'':'s'}</div>
+      <div class="bar"><i style="width:${Math.round(s.priority*100)}%"></i></div>
+    </div>
+  `).join('');
+}
+
+// ---------- Query ----------
+$('askBtn').addEventListener('click', runQuery);
+$('queryInput').addEventListener('keydown', e=>{ if(e.key==='Enter') runQuery(); });
+
+async function runQuery(){
+  const q = $('queryInput').value.trim();
+  if(!q || !docId) return;
+  $('askBtn').disabled = true;
+  $('answerBox').textContent = '';
+  $('timingRow').innerHTML = `<span class="badge"><span class="loading-dot"></span>querying all sections in parallel…</span>`;
+  $('sectionResults').innerHTML = '<div class="empty"><span class="loading-dot"></span>waiting on section indices…</div>';
+
+  const t0 = performance.now();
+  try{
+    const res = await fetch(`${backendUrl()}/query`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ doc_id: docId, query: q, api_key: $('apiKey').value.trim() })
+    });
+    if(!res.ok){ const err = await res.json().catch(()=>({detail:res.statusText})); throw new Error(err.detail || res.statusText); }
+    const data = await res.json();
+    const clientMs = Math.round(performance.now() - t0);
+
+    $('answerBox').textContent = data.answer;
+    $('timingRow').innerHTML = `
+      <span class="badge">server total: <b>${data.timing_ms.total}ms</b></span>
+      <span class="badge">round-trip: <b>${clientMs}ms</b></span>
+      <span class="badge">sections searched: <b>${data.sections.length}</b></span>
+    `;
+    renderSectionResults(data.sections);
+  }catch(e){
+    $('answerBox').textContent = `Error: ${e.message}`;
+    $('timingRow').innerHTML = '';
+    $('sectionResults').innerHTML = '<div class="empty">—</div>';
+  }finally{
+    $('askBtn').disabled = false;
+  }
+}
+
+function renderSectionResults(sections){
+  const box = $('sectionResults');
+  if(!sections.length){ box.innerHTML = '<div class="empty">No matches in any section</div>'; return; }
+  box.innerHTML = sections.map((s,i) => `
+    <div class="result-card ${s.relevant ? '' : 'filtered'}" style="animation-delay:${i*40}ms">
+      <div class="head">
+        <span class="title">${escapeHtml(s.title)}</span>
+        <span class="gate ${s.relevant ? 'pass' : 'fail'}">${s.relevant ? '✓ passed relevance gate' : '✗ filtered out'}</span>
+      </div>
+      <div class="row" style="display:flex; gap:8px; align-items:center;">
+        ${priorityPill(s.priority)}
+        <span class="score">weighted ${s.weighted_score} · confidence ${s.confidence}</span>
+      </div>
+      ${s.chunks.length ? s.chunks.map(c => `<div class="chunk">${escapeHtml(c.text)}</div>`).join('') : '<div class="chunk">No matching chunks</div>'}
+      ${s.reasoning ? `<div class="reasoning">🧠 ${escapeHtml(s.reasoning)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+$('backendUrl').addEventListener('input', ()=>{ $('backendUrlLabel').textContent = $('backendUrl').value.replace(/^https?:\/\//,''); });
+</script>
+</body>
+</html>

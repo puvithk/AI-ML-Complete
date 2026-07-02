@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pymupdf
+numpy
+scikit-learn
+anthropic
+langgraph
+pydantic
