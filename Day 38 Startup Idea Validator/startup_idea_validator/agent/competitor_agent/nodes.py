@@ -1,10 +1,8 @@
-from .state import CompetitorState , CompetitorDecision , QuestionDecomposed 
+from .state import CompetitorState , CompetitorDecision , QuestionDecomposed  , DraftReportResult
 from typing import Literal
-
 from utils.llm import llm
+from .prompt import compitator_decision_engine , question_decomposer_engine  , draft_report_prompt
 
-
-from .prompt import compitator_decision_engine , question_decomposer_engine  
 def competitor_decision_engine(state : CompetitorState) -> CompetitorState :
     # BAsed on the prevoius data and info source we need to update the state 
     llm_structure = llm.with_structured_output(CompetitorDecision)
@@ -41,4 +39,19 @@ def merger(state : CompetitorState):
     print("All data is mergered : ")
     return state
 
+
+def draft_report(state : CompetitorState):
+    llm_with_structure = llm.with_structured_output(DraftReportResult)
+
+
+    prompt = draft_report_prompt.format(pitch_text=state['pitch_query'] , pitch_summary=state['pitch_summary'] , sources=state['sources'])
+
+
+    response = llm_with_structure.invoke(prompt)
+
+
+    return {
+        "report" : response.model_dump()['report'],
+        "report_sources" : response.model_dump()['sources']
+    }
 

@@ -20,7 +20,7 @@ class CompetitorState(TypedDict):
     #Detailed summary of the research
 
     report :str 
-
+    report_sources : list[dict]
     decision_feedback : str 
     decision: Literal["web_scraper", "web_search", "draft_report"] 
 
@@ -39,4 +39,10 @@ class QuestionDecomposed(BaseModel):
     # Question for the web search
     questions : list[str] =  Field(description="All the questions based on the user request")
 
+
+class DraftReportResult(BaseModel):
+
+    report : str = Field(description="Complete Detaled Field")
+
+    sources : list[dict[int, dict[str , str, str]]] = Field(description="Sources which are used in the report")
 

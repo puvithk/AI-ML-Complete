@@ -32,7 +32,8 @@ builder.add_conditional_edges('question_decomposer' ,
                               }
                               )
 builder.add_edge('web_search_node' , 'merger')
-builder.add_edge('merger' , END)
+builder.add_edge('merger' , 'competitor_decision_engine')
+
 
 memory = InMemorySaver()
 agent = builder.compile( checkpointer=memory)

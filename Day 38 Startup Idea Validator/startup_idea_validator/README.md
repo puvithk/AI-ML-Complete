@@ -52,3 +52,6 @@ flowchart TD
     SYN --> OUT1["VC Memo PDF"]
     SYN --> OUT3["Score Dashboard"]
 ```
+
+
+# Not comepleted draft report writing And prompt for that 
