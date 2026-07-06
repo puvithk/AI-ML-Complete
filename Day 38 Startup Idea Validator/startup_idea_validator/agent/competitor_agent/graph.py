@@ -4,8 +4,7 @@ from utils.llm import llm
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
 from .state import CompetitorState
-from .nodes import competitor_decision_engine , question_decompose  , merger
-
+from .nodes import competitor_decision_engine , question_decompose  , merger , draft_report
 from .route import competitor_router , route_questions
 from .search_subgraph.graph import web_search_subagent
 from tools.web_tools import web_search_tool , web_scraping_tool
@@ -18,12 +17,13 @@ builder.add_node('question_decomposer' , question_decompose)
 
 builder.add_node('web_search_node' ,web_search_subagent )
 builder.add_node('merger' , merger)
+builder.add_node('draft_report' , draft_report)
 builder.add_edge(START , 'competitor_decision_engine')
 builder.add_conditional_edges('competitor_decision_engine' ,
                               competitor_router , {
                                   "web_scraper": END ,
                                 "web_search": "question_decomposer",
-                                  "draft_report" : END
+                                  "draft_report" : "draft_report"
                               })
 builder.add_conditional_edges('question_decomposer' ,
                               route_questions,

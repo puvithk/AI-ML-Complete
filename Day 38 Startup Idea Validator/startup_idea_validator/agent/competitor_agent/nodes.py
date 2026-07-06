@@ -44,14 +44,13 @@ def draft_report(state : CompetitorState):
     llm_with_structure = llm.with_structured_output(DraftReportResult)
 
 
-    prompt = draft_report_prompt.format(pitch_text=state['pitch_query'] , pitch_summary=state['pitch_summary'] , sources=state['sources'])
+    prompt = draft_report_prompt.format(pitch_text=state['pitch_text'] , pitch_summary=state['pitch_summary'] , sources=state['sources'])
 
 
     response = llm_with_structure.invoke(prompt)
 
 
     return {
-        "report" : response.model_dump()['report'],
-        "report_sources" : response.model_dump()['sources']
+        "report" : response.model_dump()['report']
     }
 

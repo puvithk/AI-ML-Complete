@@ -5,7 +5,7 @@ from pydantic import Field  , BaseModel
 import operator
 class CompetitorState(TypedDict):
     #The idea query 
-    pitch_query :str 
+    pitch_text :str 
     # Picth summary #Given by the previous agent 
     pitch_summary : str 
     #Question which should be asked 
@@ -44,5 +44,4 @@ class DraftReportResult(BaseModel):
 
     report : str = Field(description="Complete Detaled Field")
 
-    sources : list[dict[int, dict[str , str, str]]] = Field(description="Sources which are used in the report")
 
