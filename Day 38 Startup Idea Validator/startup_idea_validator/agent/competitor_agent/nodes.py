@@ -4,6 +4,11 @@ from utils.llm import llm
 from .prompt import compitator_decision_engine , question_decomposer_engine  , draft_report_prompt
 
 def competitor_decision_engine(state : CompetitorState) -> CompetitorState :
+    MAX_ITERATIONS = 6
+
+    if state["iteration"] >= MAX_ITERATIONS:
+        state["decision"] = "draft_report"
+        return state
     # BAsed on the prevoius data and info source we need to update the state 
     llm_structure = llm.with_structured_output(CompetitorDecision)
 

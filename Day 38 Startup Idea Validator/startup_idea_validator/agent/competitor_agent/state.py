@@ -9,7 +9,7 @@ class CompetitorState(TypedDict):
     # Picth summary #Given by the previous agent 
     pitch_summary : str 
     #Question which should be asked 
-
+    iteration: int = 0
     questions : Annotated[list[str] ,operator.add]
 
     # Detailed evidance 
