@@ -188,10 +188,3 @@ Each day represents a complete, runnable module exploring a fundamental concept,
 * **Files**: [main.ipynb](file:///f:/AI%20ML/AI-ML-Complete/Day%2030%20chatbot%20external%20memory/main.ipynb)
 
 ---
-
-## 🛠️ Key Technologies Used
-
-* **Deep Learning**: PyTorch (`nn.Module`, Tensors), TensorFlow / Keras, NumPy (Matrix calculations from scratch)
-* **Agentic Frameworks**: LangGraph (StateGraph, Checkpointers, Reducers), Smolagents (HF), LlamaIndex (AgentWorkflow, Workflows)
-* **Vector Store & Retrievers**: ChromaDB, BM25 (LangChain), HuggingFace Embeddings
-* **Tokenizers & Tools**: Hugging Face Tokenizers (BPE), SQLite (Persistence), Pydantic (Validation), Google API (Calendar)
