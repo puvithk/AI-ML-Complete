@@ -7,8 +7,8 @@ startup). Elsewhere just use `logging.getLogger(__name__)`.
 from __future__ import annotations
 
 import logging
+from .config import get_settings
 
-from utils.config import get_settings
 
 _CONFIGURED = False
 

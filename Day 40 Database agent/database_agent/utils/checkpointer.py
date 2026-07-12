@@ -11,8 +11,8 @@ from functools import lru_cache
 
 from langgraph.checkpoint.memory import InMemorySaver
 
-from utils.config import get_settings
-from utils.logging_config import get_logger
+from ..utils.config import get_settings
+from ..utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

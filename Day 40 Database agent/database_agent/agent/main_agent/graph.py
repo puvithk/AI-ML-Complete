@@ -1,12 +1,13 @@
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph, START, END
-from agent.main_agent.state import OrchestratorAgentState
-from agent.main_agent.nodes import question_decomposer, merge, final_result
-from agent.main_agent.route import route_to, critic_route
-from agent.sql_agent.graph import agent as sql_agent
-from utils.database import db_connection
-from utils.checkpointer import get_checkpointer
-from utils.logging_config import get_logger
+
+from .state import OrchestratorAgentState
+from .nodes import question_decomposer , merge , final_result
+from .route import route_to , critic_route
+from ..sql_agent.graph import agent as sql_agent
+from ...utils.database import db_connection
+from ...utils.checkpointer import get_checkpointer
+from ...utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -1,5 +1,5 @@
-from agent.sql_agent.state import SqlQueryRetrialState
-from utils.config import get_settings
+from ..sql_agent.state import SqlQueryRetrialState
+from ...utils.config import get_settings
 
 
 def retry_query(state: SqlQueryRetrialState) -> str:

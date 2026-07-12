@@ -19,8 +19,8 @@ from typing import Iterator
 import psycopg2
 from psycopg2 import pool as pg_pool
 
-from utils.config import get_settings
-from utils.logging_config import get_logger
+from ..utils.config import get_settings
+from ..utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

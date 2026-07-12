@@ -1,11 +1,12 @@
-from agent.sql_agent.state import SqlQueryRetrialState, RequiredTables, QueryResult, CriticResult, FinalAnswer
-from agent.sql_agent.prompt import get_required_table_prompt, generate_sql_query_prompt, critic_check_prompt, final_answer_prompt
+from ..sql_agent.state import SqlQueryRetrialState, RequiredTables, QueryResult, CriticResult, FinalAnswer
+from ..sql_agent.prompt import get_required_table_prompt, generate_sql_query_prompt, critic_check_prompt, final_answer_prompt
+from ...tools.database_tools import get_database_schema, execute_sql_query, get_table_details_by_name
 
-from tools.database_tools import get_database_schema, execute_sql_query, get_table_details_by_name
 from langchain_core.runnables import RunnableConfig
 
-from utils.llm import get_llm
-from utils.logging_config import get_logger
+from ...utils.llm import get_llm
+
+from ...utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

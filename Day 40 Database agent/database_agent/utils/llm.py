@@ -12,8 +12,7 @@ from functools import lru_cache
 
 from langchain_mistralai import ChatMistralAI
 
-from utils.config import get_settings
-
+from .config import get_settings
 
 @lru_cache(maxsize=1)
 def get_llm() -> ChatMistralAI:

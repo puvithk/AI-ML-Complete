@@ -1,8 +1,9 @@
 from langgraph.graph import StateGraph , START ,END
-from agent.sql_agent.nodes import get_database_details , get_required_tables , get_table_details  , get_query , critic , execute_query , format_result
-from agent.sql_agent.state import SqlQueryRetrialState
-from agent.sql_agent.route import retry_query , is_query_successful
-from utils.checkpointer import get_checkpointer
+
+from ..sql_agent.nodes import get_database_details , get_required_tables , get_table_details  , get_query , critic , execute_query , format_result
+from ..sql_agent.state import SqlQueryRetrialState
+from ..sql_agent.route import retry_query , is_query_successful
+from ...utils.checkpointer import get_checkpointer
 builder = StateGraph(SqlQueryRetrialState)
 builder.add_node('database_details' , get_database_details)
 builder.add_node('required_tables' , get_required_tables)

@@ -1,7 +1,7 @@
-from agent.main_agent.state import OrchestratorAgentState, DecomposerResult, FinalFormatedResult
-from agent.main_agent.prompt import question_decomposer_prompt, final_answer_prompt
-from utils.llm import get_llm
-from utils.logging_config import get_logger
+from database_agent.agent.main_agent.state import OrchestratorAgentState, DecomposerResult, FinalFormatedResult
+from database_agent.agent.main_agent.prompt import question_decomposer_prompt, final_answer_prompt
+from database_agent.utils.llm import get_llm
+from database_agent.utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 

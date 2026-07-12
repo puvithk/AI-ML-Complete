@@ -7,9 +7,9 @@ returned.
 
 from __future__ import annotations
 
-from utils.config import get_settings
-from utils.logging_config import get_logger
-from utils.sql_guard import UnsafeSQLError, is_safe_identifier, validate_read_only
+from ..utils.config import get_settings
+from ..utils.logging_config import get_logger
+from ..utils.sql_guard import UnsafeSQLError, is_safe_identifier, validate_read_only
 
 logger = get_logger(__name__)
 
