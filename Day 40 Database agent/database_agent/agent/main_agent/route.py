@@ -50,3 +50,5 @@ def critic_route(state: OrchestratorAgentState):
     decision = response.model_dump()['next_node']
     logger.info("Critic decision: %s (revision %d).", decision, revisions)
     return decision
+
+

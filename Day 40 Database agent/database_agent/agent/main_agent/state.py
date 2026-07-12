@@ -18,6 +18,16 @@ class OrchestratorAgentState(TypedDict):
 
     revision_count : int  # how many critic->decompose cycles have run (loop guard)
 
+    next_route : str 
+
+    memeory : str
+
+    working_summary : str
+
+class RewriteAndRoute(BaseModel):
+    next_route : str = Field(description="Which is the next route the agent must folow")
+    rewrittern_query : str = Field(description="The rewriten query base don the user input")
+    
 
 class DecomposerResult(BaseModel):
 
@@ -31,3 +41,7 @@ class FinalFormatedResult(BaseModel):
 class CriticRouteState(BaseModel):
 
     next_node : Literal['final_result' , 'question_decomposer' ] =Field(description="Which node should the agent must follow")
+
+
+class ChitChatResponse(BaseModel):
+    answer : str =Field(description="Result of the response for normal text")

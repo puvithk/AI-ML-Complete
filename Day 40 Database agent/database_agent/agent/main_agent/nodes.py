@@ -1,5 +1,5 @@
-from database_agent.agent.main_agent.state import OrchestratorAgentState, DecomposerResult, FinalFormatedResult
-from database_agent.agent.main_agent.prompt import question_decomposer_prompt, final_answer_prompt
+from database_agent.agent.main_agent.state import OrchestratorAgentState, DecomposerResult, FinalFormatedResult , ChitChatResponse , RewriteAndRoute
+from database_agent.agent.main_agent.prompt import question_decomposer_prompt, final_answer_prompt , chit_chat_prompt, REWRITE_AND_ROUTE_PROMPT
 from database_agent.utils.llm import get_llm
 from database_agent.utils.logging_config import get_logger
 
@@ -17,6 +17,34 @@ def question_decomposer(state: OrchestratorAgentState):
     return {
         "decomposed_question": questions
     }
+
+def chit_chat(state : OrchestratorAgentState) -> OrchestratorAgentState:
+    """This node returns only normal talks like hello , hi , how r u  """
+    llm_structure = get_llm().with_structured_output(ChitChatResponse)
+
+    prompt = chit_chat_prompt.format(user_question=state['user_question'])
+    response = llm_structure.invoke(prompt)
+
+    return {
+        "final_answer" : response
+    }
+
+
+def rewrite_and_route(state : OrchestratorAgentState) -> OrchestratorAgentState:
+    llm_structure = get_llm().with_structured_output(RewriteAndRoute)
+
+    prompt = REWRITE_AND_ROUTE_PROMPT.format(user_question=state['user_question'] , working_summary=state['working_summary'])
+
+    response = llm_structure.invoke(prompt)
+
+    return {
+        "user_question" : response.model_dump()['rewrittern_query'] , 
+        "next_route" : response.model_dump()['next_route']
+    }
+
+
+
+
 
 
 def merge(state: OrchestratorAgentState):
