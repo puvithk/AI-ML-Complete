@@ -38,7 +38,7 @@ def run_sql_agent(state, config: RunnableConfig):
                 {"user_question": question, "retry_no": state.get("retry_no", 0)},
                 config=sub_config,
             )
-        except Exception as exc:  # noqa: BLE001 - one branch must not kill the run
+        except Exception:  # noqa: BLE001 - one branch must not kill the run
             logger.exception("SQL sub-agent failed for question: %s", question)
             return {
                 "final_answer": [
